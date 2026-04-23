@@ -13,10 +13,13 @@
       ".git",
       "firebase-debug.log",
       "firebase-debug.*.log"
-    ]
+    ],
+    "engines": {
+      "node": "20"
+    }
   },
   "hosting": {
-    "public": "apps/web/dist",
+    "public": "apps/web/build",
     "ignore": [
       "firebase.json",
       "**/.*",

@@ -12,9 +12,9 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
       id: user.uid,
       email: user.email || '',
       displayName: user.displayName || '',
-      role: null as any, // 초기값 미설정
-      createdAt: admin.firestore.FieldValue.serverTimestamp() as any,
-      updatedAt: admin.firestore.FieldValue.serverTimestamp() as any,
+      role: null as unknown as IUser['role'],
+      createdAt: admin.firestore.FieldValue.serverTimestamp() as unknown as IUser['createdAt'],
+      updatedAt: admin.firestore.FieldValue.serverTimestamp() as unknown as IUser['updatedAt'],
     };
 
     await userRef.set(newUser);

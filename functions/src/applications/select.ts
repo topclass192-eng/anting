@@ -7,9 +7,8 @@ interface SelectRequest {
   status: ApplicationStatus;
 }
 
-export const select = functions.https.onCall(async (data: SelectRequest, context) => {
+export const select = functions.https.onCall(async (_data: SelectRequest, _context) => {
   try {
-    // 빈 함수 구조
     return { success: true, message: 'select called' };
   } catch (error) {
     return handleError(error);

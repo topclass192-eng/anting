@@ -1,9 +1,9 @@
 export const ERROR_MESSAGES = {
-  UNAUTHORIZED: '인증이 필요합니다.',
-  FORBIDDEN: '접근 권한이 없습니다.',
-  NOT_FOUND: '요청한 데이터를 찾을 수 없습니다.',
-  INVALID_INPUT: '입력값이 올바르지 않습니다.',
-  INTERNAL_SERVER_ERROR: '서버 내부 오류가 발생했습니다.',
+  UNAUTHORIZED: '?몄쬆???꾩슂?⑸땲??',
+  FORBIDDEN: '?묎렐 沅뚰븳???놁뒿?덈떎.',
+  NOT_FOUND: '?붿껌???곗씠?곕? 李얠쓣 ???놁뒿?덈떎.',
+  INVALID_INPUT: '?낅젰媛믪씠 ?щ컮瑜댁? ?딆뒿?덈떎.',
+  INTERNAL_SERVER_ERROR: '?쒕쾭 ?대? ?ㅻ쪟媛 諛쒖깮?덉뒿?덈떎.',
 };
 
 export class AppError extends Error {

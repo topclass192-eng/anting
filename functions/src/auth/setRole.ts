@@ -6,9 +6,8 @@ interface SetRoleRequest {
   role: Role;
 }
 
-export const setRole = functions.https.onCall(async (data: SetRoleRequest, context) => {
+export const setRole = functions.https.onCall(async (_data: SetRoleRequest, _context) => {
   try {
-    // 빈 함수 구조
     return { success: true, message: 'setRole called' };
   } catch (error) {
     return handleError(error);

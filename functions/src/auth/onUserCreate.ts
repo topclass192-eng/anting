@@ -1,5 +1,6 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
+import { FieldValue } from 'firebase-admin/firestore';
 import { handleError } from '../utils/errors';
 import type { IUser } from '../types';
 
@@ -13,8 +14,9 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
       email: user.email || '',
       displayName: user.displayName || '',
       role: null as unknown as IUser['role'],
-      createdAt: admin.firestore.FieldValue.serverTimestamp() as unknown as IUser['createdAt'],
-      updatedAt: admin.firestore.FieldValue.serverTimestamp() as unknown as IUser['updatedAt'],
+      onboardingStep: 0,
+      createdAt: FieldValue.serverTimestamp() as unknown as IUser['createdAt'],
+      updatedAt: FieldValue.serverTimestamp() as unknown as IUser['updatedAt'],
     };
 
     await userRef.set(newUser);

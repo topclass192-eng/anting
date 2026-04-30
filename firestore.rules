@@ -1,17 +1,62 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // 1. users Collection: 사용자 본인만 자신의 정보를 수정할 수 있음
-    match /users/{userId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null && request.auth.uid == userId;
+    function isAuthenticated() {
+      return request.auth != null;
     }
     
-    // 2. 다른 모든 컬렉션: 우선 인증된 사용자만 접근 가능하도록 설정
-    // 더 정교한 Role-based Access Control 로직은 추가 구현 예정 (예: admin 등)
-    match /{document=**} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin";
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    
+    function isRole(role) {
+      return isAuthenticated() && ('role' in request.auth.token) && request.auth.token.role == role;
+    }
+
+    // 1. users: 본인만 읽기/쓰기, admin은 전체 읽기
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isRole("admin"));
+      allow write: if isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // 2. brands: 본인(brand 역할)만 쓰기, 인증 유저 읽기
+    match /brands/{brandId} {
+      allow read: if isAuthenticated();
+      allow write: if isRole("brand") && request.auth.uid == brandId;
+    }
+
+    // 3. influencers: 본인(influencer 역할)만 쓰기, 인증 유저 읽기
+    match /influencers/{influencerId} {
+      allow read: if isAuthenticated();
+      allow write: if isRole("influencer") && request.auth.uid == influencerId;
+    }
+
+    // 4. campaigns: brand 역할만 생성/수정, 인증 유저 전체 읽기
+    match /campaigns/{campaignId} {
+      allow read: if isAuthenticated();
+      allow create: if isRole("brand") && request.resource.data.get('brandId', '') == request.auth.uid;
+      allow update: if isRole("brand") && resource.data.get('brandId', '') == request.auth.uid && request.resource.data.get('brandId', '') == request.auth.uid;
+      allow delete: if isRole("brand") && resource.data.get('brandId', '') == request.auth.uid;
+    }
+
+    // 5. applications: influencer 역할만 생성, 본인 것만 읽기/수정, 관련 brand는 읽기 가능
+    match /applications/{appId} {
+      allow create: if isRole("influencer") && request.resource.data.influencerId == request.auth.uid;
+      allow read: if isAuthenticated() && (
+        resource.data.influencerId == request.auth.uid || 
+        resource.data.brandId == request.auth.uid ||
+        get(/databases/$(database)/documents/campaigns/$(resource.data.campaignId)).data.brandId == request.auth.uid
+      );
+      allow update: if isRole("influencer") && resource.data.influencerId == request.auth.uid && request.resource.data.influencerId == request.auth.uid;
+      allow delete: if isRole("influencer") && resource.data.influencerId == request.auth.uid;
+    }
+
+    // 6. products: brand 역할만 생성/수정, 인증 유저 읽기
+    match /products/{productId} {
+      allow read: if isAuthenticated();
+      allow create: if isRole("brand") && request.resource.data.brandId == request.auth.uid;
+      allow update: if isRole("brand") && resource.data.brandId == request.auth.uid && request.resource.data.brandId == request.auth.uid;
+      allow delete: if isRole("brand") && resource.data.brandId == request.auth.uid;
     }
   }
 }

@@ -13,6 +13,7 @@ export interface IUser {
   updatedAt: Timestamp;
   profileImageUrl?: string;
   phoneNumber?: string;
+  onboardingStep?: number;
 }
 
 export interface IBrand {

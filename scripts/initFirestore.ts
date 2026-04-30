@@ -1,70 +1,84 @@
-/**
- * scripts/initFirestore.ts
- * Firestore 컬렉션 초기화 및 인덱스 구성 안내 스크립트.
- *
- * 본 파일은 Phase 1 MVP 구성을 위한 초기 구조 문서화 목적으로 작성되었습니다.
- * 실제 데이터 주입을 원할 경우 firebase-admin을 활용하도록 구성되어야 합니다.
- */
-
-/*
-// Firebase Admin SDK 초기화 예시
 import * as admin from 'firebase-admin';
-admin.initializeApp();
+
+// Set emulator host before initializing
+process.env.FIRESTORE_EMULATOR_HOST = '127.0.0.1:8080';
+process.env.FIREBASE_AUTH_EMULATOR_HOST = '127.0.0.1:9099';
+
+admin.initializeApp({
+  projectId: 'demo-project'
+});
+
 const db = admin.firestore();
-
-// 1. users Collection
-async function initUsers() {
-  // Collection: users
-  // Single-field index: role (Asc), createdAt (Desc)
-  const userRef = db.collection('users').doc('admin_user_01');
-  await userRef.set({
-    email: 'admin@anting.app',
-    displayName: 'Admin User',
-    role: 'admin',
-    createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-  });
-}
-
-// 2. brands Collection
-async function initBrands() {
-  // Collection: brands
-  // Use users.id as Doc ID (1:1 relationship)
-  // Single-field index: createdAt (Desc)
-  const brandRef = db.collection('brands').doc('brand_user_01');
-  await brandRef.set({
-    userId: 'brand_user_01',
-    companyName: 'Test Brand',
-    businessRegistrationNumber: '123-45-67890',
-    managerName: 'Jane Doe',
-    managerPhone: '010-1234-5678',
-    managerEmail: 'contact@brand.com',
-    createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-  });
-}
-
-// 3. influencers Collection
-// Single-field index: grade (Asc), createdAt (Desc)
-
-// 4. campaigns Collection
-// Composite index: brandId (Asc), status (Asc)
-// Single-field index: status (Asc), createdAt (Desc)
-
-// 5. applications Collection
-// Composite index: campaignId (Asc), status (Asc)
-// Composite index: influencerId (Asc), status (Asc)
-
-// 6. products Collection, 7. orders Collection, 8. points Collection
-// ... Setup initial reference patterns here
-*/
 
 export const initializeFirestore = async () => {
     console.log("Firestore 컬렉션 초기화 스크립트 실행 시작.");
-    console.log("초기화 대상 Collections: users, brands, influencers, campaigns, applications, products, orders, points, notifications");
-    console.log("실제 데이터 초기화가 필요한 경우 주석 처리된 firebase-admin 구현체를 활성화하여 실행하세요.");
+    
+    const now = admin.firestore.FieldValue.serverTimestamp();
+
+    // 1. users
+    const users = [
+      { id: 'admin1', email: 'admin@anting.app', role: 'admin', createdAt: now, updatedAt: now },
+      { id: 'brand1', email: 'brand1@test.com', role: 'brand', createdAt: now, updatedAt: now },
+      { id: 'brand2', email: 'brand2@test.com', role: 'brand', createdAt: now, updatedAt: now },
+      { id: 'influencer1', email: 'inf1@test.com', role: 'influencer', createdAt: now, updatedAt: now },
+      { id: 'influencer2', email: 'inf2@test.com', role: 'influencer', createdAt: now, updatedAt: now },
+      { id: 'viewer1', email: 'viewer@test.com', role: 'viewer', createdAt: now, updatedAt: now },
+    ];
+    for (const u of users) {
+      await db.collection('users').doc(u.id).set(u);
+    }
+
+    // 2. brands
+    const brands = [
+      { id: 'brand1', userId: 'brand1', companyName: 'Brand One', managerName: 'Manager A', createdAt: now },
+      { id: 'brand2', userId: 'brand2', companyName: 'Brand Two', managerName: 'Manager B', createdAt: now },
+    ];
+    for (const b of brands) {
+      await db.collection('brands').doc(b.id).set(b);
+    }
+
+    // 3. influencers
+    const influencers = [
+      { id: 'influencer1', userId: 'influencer1', nickName: 'Inf One', grade: 'A', createdAt: now },
+      { id: 'influencer2', userId: 'influencer2', nickName: 'Inf Two', grade: 'B', createdAt: now },
+    ];
+    for (const i of influencers) {
+      await db.collection('influencers').doc(i.id).set(i);
+    }
+
+    // 4. campaigns (created by brand)
+    const campaigns = [
+      { id: 'camp1', brandId: 'brand1', title: 'Summer Campaign', status: 'active', createdAt: now },
+      { id: 'camp2', brandId: 'brand2', title: 'Winter Campaign', status: 'draft', createdAt: now },
+    ];
+    for (const c of campaigns) {
+      await db.collection('campaigns').doc(c.id).set(c);
+    }
+
+    // 5. applications (created by influencer)
+    const applications = [
+      { id: 'app1', campaignId: 'camp1', influencerId: 'influencer1', status: 'pending', createdAt: now },
+      { id: 'app2', campaignId: 'camp1', influencerId: 'influencer2', status: 'approved', createdAt: now },
+    ];
+    for (const a of applications) {
+      await db.collection('applications').doc(a.id).set(a);
+    }
+
+    // 6. products (created by brand)
+    const products = [
+      { id: 'prod1', brandId: 'brand1', name: 'Cool Shirt', price: 20000, createdAt: now },
+      { id: 'prod2', brandId: 'brand2', name: 'Warm Jacket', price: 50000, createdAt: now },
+    ];
+    for (const p of products) {
+      await db.collection('products').doc(p.id).set(p);
+    }
+
+    console.log("초기화 대상 Collections (users, brands, influencers, campaigns, applications, products) 완료.");
 };
 
 if (require.main === module) {
-    initializeFirestore().catch(console.error);
+    initializeFirestore().then(() => {
+        console.log("초기화 완료");
+        process.exit(0);
+    }).catch(console.error);
 }

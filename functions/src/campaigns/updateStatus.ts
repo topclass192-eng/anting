@@ -7,7 +7,7 @@ interface UpdateStatusRequest {
   status: CampaignStatus;
 }
 
-export const updateStatus = functions.https.onCall(async (_data: UpdateStatusRequest, _context) => {
+export const updateStatus = functions.region('asia-northeast3').https.onCall(async (_data: UpdateStatusRequest, _context) => {
   try {
     return { success: true, message: 'updateStatus called' };
   } catch (error) {

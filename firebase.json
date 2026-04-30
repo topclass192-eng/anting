@@ -15,9 +15,10 @@
       "firebase-debug.*.log"
     ],
     "engines": {
-      "node": "20"
+      "node": "24"
     }
   },
+
   "hosting": {
     "public": "apps/web/build",
     "ignore": [
